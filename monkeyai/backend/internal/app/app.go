@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/chaitin/MonkeyCode/monkeyai/backend/internal/ossmember"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
@@ -84,8 +85,8 @@ type InstanceIdentity interface {
 }
 
 func New(ctx context.Context, cfg config.Config, logger *slog.Logger) (*App, error) {
-	return newApp(ctx, cfg, logger, func(*pgxpool.Pool) (member.UserWriter, member.GroupWriter, error) {
-		return member.EmptyUserWriter{}, member.EmptyGroupWriter{}, nil
+	return newApp(ctx, cfg, logger, func(pool *pgxpool.Pool) (member.UserWriter, member.GroupWriter, error) {
+		return ossmember.Users(pool), ossmember.Groups(), nil
 	}, nil)
 }
 
