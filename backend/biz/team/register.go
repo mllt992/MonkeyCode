@@ -43,6 +43,7 @@ func ProvideTeam(i *do.Injector) {
 	do.Provide(i, usecase.NewTeamOIDCUsecase)
 	do.Provide(i, usecase.NewTeamOIDCLoginUsecase)
 	do.Provide(i, v1.NewTeamOIDCHandler)
+	do.Provide(i, usecase.NewMemberManager)
 	do.Provide(i, v1.NewTeamGroupUserHandler)
 }
 

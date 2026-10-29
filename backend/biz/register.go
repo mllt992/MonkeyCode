@@ -2,6 +2,8 @@ package biz
 
 import (
 	"context"
+	hostrepo "github.com/chaitin/MonkeyCode/backend/biz/host/repo"
+	hostusecase "github.com/chaitin/MonkeyCode/backend/biz/host/usecase"
 
 	"github.com/google/uuid"
 	"github.com/samber/do"
@@ -76,6 +78,9 @@ func RegisterOpenSource(i *do.Injector) {
 	mcphub.ProvideMCPHub(i)
 	static.ProviderStatic(i)
 	do.ProvideValue[domain.TaskHook](i, &taskhook{})
+	// 公共宿主机：git webhook 等处理器强依赖 PublicHostUsecase
+	do.Provide(i, hostrepo.NewPublicHostRepo)
+	do.Provide(i, hostusecase.NewPublicHostUsecase)
 }
 
 func InvokeOpenSource(i *do.Injector) {
