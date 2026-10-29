@@ -69,6 +69,9 @@ func NewTeamGroupUserHandler(i *do.Injector) (*TeamGroupUserHandler, error) {
 	u.PUT("/:user_id", web.BindHandler(h.UpdateUser), auth.TeamAuth(), adminAuth, audit.Audit("update_team_user"))
 	u.DELETE("/:user_id", web.BindHandler(h.DeleteUser), auth.TeamAuth(), adminAuth, audit.Audit("delete_team_user"))
 
+	// 开源自托管版没有 license：返回基于 teams.member_limit 的“已授权”状态，供前端展示席位
+	w.Group("/api/v1/license").GET("/status", web.BaseHandler(h.LicenseStatus), auth.TeamAuth())
+
 	g := w.Group("/api/v1/teams/groups")
 	g.GET("", web.BaseHandler(h.List), auth.TeamAuth())
 	g.POST("", web.BindHandler(h.Add), auth.TeamAuth(), adminAuth, audit.Audit("add_team_group"))
@@ -485,4 +488,19 @@ func (h *TeamGroupUserHandler) ModifyGroupUsers(c *web.Context, req domain.AddTe
 		return err
 	}
 	return c.Success(resp)
+}
+
+// LicenseStatus 自托管版席位状态（无 license 校验，席位取自团队 member_limit）
+func (h *TeamGroupUserHandler) LicenseStatus(c *web.Context) error {
+	teamUser := middleware.GetTeamUser(c)
+	resp, err := h.usecase.MemberList(c.Request().Context(), teamUser, &domain.MemberListReq{Role: consts.TeamMemberRoleUser})
+	if err != nil {
+		return err
+	}
+	return c.Success(map[string]any{
+		"state":         "active",
+		"customer_name": "self-hosted",
+		"seats":         resp.MemberLimit,
+		"used_seats":    len(resp.Members),
+	})
 }

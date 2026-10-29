@@ -332,7 +332,7 @@ func (r *TeamGroupUserRepo) InitTeam(ctx context.Context, email string, name str
 			initTeam, err = tx.Team.Create().
 				SetID(uuid.New()).
 				SetName(name).
-				SetMemberLimit(5).
+				SetMemberLimit(100).
 				Save(ctx)
 			if err != nil {
 				return err
